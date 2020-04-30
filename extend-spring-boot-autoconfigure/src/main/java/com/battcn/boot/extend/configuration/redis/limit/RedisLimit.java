@@ -54,11 +54,19 @@ public @interface RedisLimit {
 
 
     /**
+     * 最多的访问限制次数redis key
+     *
+     * @return int
+     */
+    String countKey() default "";
+
+
+    /**
      * 默认异常信息
      *
      * @return String
      */
-    String message() default "You have been dragged into the blacklist";
+    String message() default "Access frequency is too high, please try again later";
 
     /**
      * 限流描述

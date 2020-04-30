@@ -60,6 +60,24 @@ public class RedisLimitHelper {
         return count != null && count.longValue() <= limitCount;
     }
 
+    /**
+     * 尝试获取
+     *
+     * @param key         key
+     * @param limitCountKey  限流数 rediskey
+     * @param limitExpire 限流时间
+     * @param description 描述信息
+     * @return true | false
+     */
+    public boolean tryAcquire(String key, String limitCountKey, long limitExpire, String description) {
+        if(redisLimitTemplate.hasKey(limitCountKey)){
+            int limitCount = (int)redisLimitTemplate.opsForValue().get(limitCountKey);
+            return tryAcquire(key,limitCount,limitExpire,description);
+        }else{
+            return true;
+        }
+    }
+
 
     /**
      * 限流 脚本

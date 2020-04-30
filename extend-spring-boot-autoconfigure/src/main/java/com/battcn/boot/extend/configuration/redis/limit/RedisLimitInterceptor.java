@@ -1,6 +1,9 @@
 package com.battcn.boot.extend.configuration.redis.limit;
 
+import cn.hutool.core.util.StrUtil;
 import com.battcn.boot.extend.configuration.redis.RedisKeyGenerator;
+import com.fishingtime.framework.common.web.response.Response;
+import com.fishingtime.framework.common.web.response.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -30,7 +33,7 @@ public class RedisLimitInterceptor {
 
 
     @Around("execution(public * *(..)) && @annotation(com.battcn.boot.extend.configuration.redis.limit.RedisLimit)")
-    public Object interceptor(ProceedingJoinPoint pjp) {
+    public Object interceptor(ProceedingJoinPoint pjp) throws Throwable {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
         RedisLimit limitAnnotation = method.getAnnotation(RedisLimit.class);
@@ -38,24 +41,25 @@ public class RedisLimitInterceptor {
         final String delimiter = limitAnnotation.delimiter();
         final String description = limitAnnotation.description();
         final long count = limitAnnotation.count();
+        final String countKey = limitAnnotation.countKey();
         final long limitExpire = limitAnnotation.expire();
         final long seconds = Expiration.from(limitExpire, limitAnnotation.timeUnit()).getExpirationTimeInSeconds();
         String key = redisKeyGenerator.generate(prefix, delimiter, pjp);
+        boolean acquire = true;
         try {
-            final boolean acquire = this.redisLimitHelper.tryAcquire(key, count, seconds, description);
-            if (acquire) {
-                return pjp.proceed();
+            if (StrUtil.isEmpty(countKey)) {
+                acquire = this.redisLimitHelper.tryAcquire(key, count, seconds, description);
             } else {
-                throw new RuntimeException(limitAnnotation.message());
+                acquire = this.redisLimitHelper.tryAcquire(key, countKey, seconds, description);
             }
+
         } catch (Throwable e) {
-            log.error("[server exception]", e);
-            if (e instanceof RuntimeException) {
-                throw new RuntimeException(e.getLocalizedMessage());
-            }
-            throw new RuntimeException("server exception");
+            log.error("[limit server exception]", e);
+        }
+        if (acquire) {
+            return pjp.proceed();
+        } else {
+            return Response.fail(ResultStatus.SYSTEM_ERROR, limitAnnotation.message());
         }
     }
-
-
 }

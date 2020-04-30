@@ -77,7 +77,7 @@
     </properties>
 
 
-    <distributionManagement>
+    <!--<distributionManagement>
         <snapshotRepository>
             <id>oss</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -86,8 +86,17 @@
             <id>oss</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
+    </distributionManagement>-->
+    <distributionManagement>
+        <repository>
+            <id>rdc-releases</id>
+            <url>https://repo.rdc.aliyun.com/repository/104345-release-2uXlFb/</url>
+        </repository>
+        <snapshotRepository>
+            <id>rdc-snapshots</id>
+            <url>https://repo.rdc.aliyun.com/repository/104345-snapshot-JR54du/</url>
+        </snapshotRepository>
     </distributionManagement>
-
 
     <profiles>
         <profile>
@@ -168,7 +177,7 @@
                 </plugins>
             </build>
 
-            <distributionManagement>
+            <!--<distributionManagement>
                 <snapshotRepository>
                     <id>oss</id>
                     <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -177,7 +186,7 @@
                     <id>oss</id>
                     <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
                 </repository>
-            </distributionManagement>
+            </distributionManagement>-->
         </profile>
 
     </profiles>
